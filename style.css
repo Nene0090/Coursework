@@ -185,19 +185,19 @@ body.light .side-menu button:not(.closeMenu) {
 
     .top-buttons{
         position: fixed;
-        bottom: 15px;
-        left: 15px;
+        bottom: 12px;
+        left: 12px;
         width: auto;
         display: flex;
-        flex-direction: column;
+        flex-direction: row;
         gap: 8px;
         z-index: 9999;
     }
 
     .top-buttons button {
-        padding: 6px 10px;
-        font-size: 13px;
-        border-radius: 8px;
+        padding: 4px 8px;
+        font-size: 12px;
+        border-radius: 6px;
     }
 
     .side-menu {
@@ -205,10 +205,10 @@ body.light .side-menu button:not(.closeMenu) {
     }
 
     .closeMenu {
-        width: 28px;
-        height: 28px;
-        line-height: 28px;
-        font-size: 18px;
+        width: 24px;
+        height: 24px;
+        line-height: 24px;
+        font-size: 16px;
         padding: 0;
         margin: 0;
     }
