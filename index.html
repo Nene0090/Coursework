@@ -39,7 +39,7 @@ document.getElementById("loginBtn").onclick = async () => {
     const response = await fakeCheck(login, pass);
 
     if (response === "OK") {
-        window.location.href = "Проект.html";
+        window.location.href = "project.html";
     } else {
         error.textContent = "Ой, что-то не так. Попробуйте ещё раз.";
     }
