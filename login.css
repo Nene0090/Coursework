@@ -1,0 +1,95 @@
+:root {
+    --steelblue: #1a2536;
+    --lightsky: #a8caff;
+    --lightcyan: #ffffff;
+}
+
+body {
+    margin: 0;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: var(--steelblue);
+    font-family: "Segoe UI", Arial, sans-serif;
+}
+
+.login-box {
+    width: 350px;
+    padding: 25px;
+    background: #2c3e55;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.25);
+    text-align: center;
+}
+
+.login-box h1 {
+    font-size: 27px;
+    margin-top: 4;
+    color: #a8caff;
+    margin-bottom: 30px;
+}
+
+.input-group {
+    text-align: left;
+    margin-bottom: 15px;
+}
+
+.input-group label {
+    font-size: 14px;
+    color: #a8caff;
+}
+
+.input-group input {
+    width: 90%;
+    padding: 10px;
+    border: 2px solid var(--lightsky);
+    border-radius: 6px;
+    font-size: 14px;
+    margin-top: 5px;
+}
+
+button {
+    margin-top: 20px;
+    width: 90%;
+    padding: 12px;
+    background: var(--steelblue);
+    color: #a8caff;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 15px;
+    transition: 0.2s;
+}
+
+button:hover {
+    background: var(--lightsky);
+}
+
+#error {
+    margin-top: 12px;
+    color: rgb(255, 62, 62);
+    font-size: 18px;
+    -webkit-text-stroke: 0.05px #000000;
+}
+
+@media (max-width: 600px) {
+    .login-box {
+        width: 90%;
+        padding: 20px;
+    }
+
+    .login-box h1 {
+        font-size: 24px;
+    }
+
+    .input-group input {
+        font-size: 14px;
+        padding: 9px;
+    }
+
+    button {
+        font-size: 15px;
+        padding: 10px;
+    }
+}
