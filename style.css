@@ -183,11 +183,10 @@ body.light .side-menu button:not(.closeMenu) {
         text-align: center;
     }
 
-    .top-buttons{
+    .top-buttons {
         position: fixed;
         bottom: 12px;
         left: 12px;
-        width: auto;
         display: flex;
         flex-direction: row;
         gap: 8px;
@@ -195,22 +194,17 @@ body.light .side-menu button:not(.closeMenu) {
     }
 
     .top-buttons button {
-        padding: 4px 8px;
+        padding: 5px 10px;
         font-size: 12px;
         border-radius: 6px;
+        width: auto;
+        min-width: 70px;
     }
 
     .side-menu {
-        width: 80%;
-    }
-
-    .closeMenu {
-        width: 24px;
-        height: 24px;
-        line-height: 24px;
-        font-size: 16px;
-        padding: 0;
-        margin: 0;
+        width: 85%;
+        max-width: 320px;
+        right: -320px;
     }
 
     .menu-header {
@@ -220,6 +214,22 @@ body.light .side-menu button:not(.closeMenu) {
         display: flex;
         justify-content: space-between;
         align-items: center;
+    }
+
+    .closeMenu {
+        width: 28px;
+        height: 28px;
+        line-height: 28px;
+        font-size: 18px;
+        padding: 0;
+        margin: 0;
+        border-radius: 6px;
+    }
+
+    .side-menu button:not(.closeMenu) {
+        font-size: 14px;
+        padding: 10px;
+        margin-bottom: 8px;
     }
 
     .side-menu button {
