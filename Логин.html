@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Вход в систему</title>
+    <link rel="stylesheet" href="login.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+
+<body>
+    <div class="login-box">
+        <h1>Вход в систему</h1>
+
+    <div class="input-group">
+        <label>Логин</label>
+        <input type="text" id="login">
+    </div>
+
+    <div class="input-group">
+        <label>Пароль</label>
+        <input type="password" id="password">
+    </div>
+
+    <button id="loginBtn">Войти</button>
+    <p id="error"></p>
+</div>
+
+<script>
+document.getElementById("loginBtn").onclick = async () => {
+    const login = document.getElementById("login").value.trim();
+    const pass = document.getElementById("password").value.trim();
+    const error = document.getElementById("error");
+
+    if (!login || !pass) {
+        error.textContent = "Введите логин и пароль";
+        return;
+    }
+
+    const response = await fakeCheck(login, pass);
+
+    if (response === "OK") {
+        window.location.href = "Проект.html";
+    } else {
+        error.textContent = "Ой, что-то не так. Попробуйте ещё раз.";
+    }
+};
+async function fakeCheck(login, pass) {
+    if (login === "admin" && pass === "123") return "OK";
+    return "FAIL";
+}
+</script>
+</body>
+</html>
