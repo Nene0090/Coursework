@@ -42,7 +42,6 @@
     <button id="btnCombined" onclick="loadCombined()">Динамика тикетов</button>
     <button id="btnStatuses" onclick="loadStatuses()">Статусы тикетов</button>
     <button id="btnLines" onclick="loadLinesStatuses()">Статусы по линиям</button>
-    <button id="btnBase" onclick="loadBaseData()">Загрузить базу данных</button>
 </div>
 
 <script>
@@ -55,14 +54,12 @@ function applyRoleAccess() {
 
     if (userRole === "employee"){
         document.getElementById("btnSLA").style.display = "none";
-        document.getElementById("btnBase").style.display = "none";
     }
 
     if (userRole === "user"){
         document.getElementById("btnSLA").style.display = "none";
         document.getElementById("btnLoad").style.display = "none";
         document.getElementById("btnCombined").style.display = "none";
-        document.getElementById("btnBase").style.display = "none";
     }
 }
 let chart;
@@ -181,7 +178,6 @@ function loadLoad() {
     update.request("load");
 }
 
-
 function loadStatuses() {
     showPeriods(false);
     update.request("statuses");
@@ -220,9 +216,6 @@ class DashboardUpdater {
                 break;
             case "lines":
                 renderChart("bar", data.labels, data.datasets);
-                break;
-            case "base":
-                console.log("База загружена:", data);
                 break;
             default:
                 console.error("Неизвестный тип:", data.type);
