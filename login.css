@@ -75,21 +75,24 @@ button:hover {
 
 @media (max-width: 600px) {
     .login-box {
-        width: 40%;
-        padding: 10px;
+        width: 90%;
+        padding: 15px;
+        max-height: 90vh;
+        overlow: hidden;
     }
 
     .login-box h1 {
-        font-size: 24px;
+        font-size: 20px;
+        margin-bottom: 15px;
     }
 
     .input-group input {
-        font-size: 14px;
-        padding: 9px;
+        font-size: 13px;
+        padding: 8px;
     }
 
     button {
-        font-size: 15px;
+        font-size: 14px;
         padding: 10px;
     }
 }
