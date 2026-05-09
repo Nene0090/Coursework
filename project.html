@@ -35,7 +35,12 @@
 <div class="side-menu" id="sideMenu">
     <div class="menu-header">
         <h2>Графики</h2>
-        <button class="closeMenu" onclick="toggleMenu()">✖</button>
+        <button class="closeMenu" onclick="toggleMenu()">
+            <svg viewBox="0 0 24 24" width="18" height="18">
+                <line x1="4" y1="4" x2="20" y2="20" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+                <line x1="20" y1="4" x2="4" y2="20" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+            </svg>
+        </button>
     </div>
     <button id="btnSLA" onclick="loadSLA()">SLA по приоритетам</button>
     <button id="btnLoad" onclick="loadLoad()">Загрузка исполнителей</button>
