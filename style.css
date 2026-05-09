@@ -218,11 +218,16 @@ body.light .side-menu button:not(.closeMenu) {
         align-items: center;
     }
 
-    .closeMenu {
-        width: 28px;
-        height: 28px;
-        border-radius: 6px;
+    .closeMenu svg {
+        width: 24px;
+        height: 24px;
         flex-shrink: 0;
+    }
+
+    .closeMenu {
+        display: flex;
+        align-items: center;
+        justify-content: center;
     }
 
     .side-menu button:not(.closeMenu) {
