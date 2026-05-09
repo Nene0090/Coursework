@@ -75,8 +75,8 @@ button:hover {
 
 @media (max-width: 600px) {
     .login-box {
-        width: 90%;
-        padding: 20px;
+        width: 40%;
+        padding: 10px;
     }
 
     .login-box h1 {
