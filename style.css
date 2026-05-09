@@ -191,6 +191,8 @@ body.light .side-menu button:not(.closeMenu) {
         flex-direction: row;
         gap: 8px;
         z-index: 9999;
+        right: auto;
+        top: auto;
     }
 
     .top-buttons button {
@@ -224,6 +226,7 @@ body.light .side-menu button:not(.closeMenu) {
         padding: 0;
         margin: 0;
         border-radius: 6px;
+        flex-shrink: 0;
     }
 
     .side-menu button:not(.closeMenu) {
