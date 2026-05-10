@@ -219,9 +219,10 @@ body.light .side-menu button:not(.closeMenu) {
     }
 
     .closeMenu svg {
-        width: 24px;
-        height: 24px;
+        width: 28px;
+        height: 28px;
         flex-shrink: 0;
+        display: block
     }
 
     .closeMenu {
