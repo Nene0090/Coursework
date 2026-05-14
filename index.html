@@ -28,26 +28,42 @@
 <script>
 document.getElementById("loginBtn").onclick = async () => {
     const login = document.getElementById("login").value.trim();
-    const pass = document.getElementById("password").value.trim();
+    const password = document.getElementById("password").value.trim();
     const error = document.getElementById("error");
 
-    if (!login || !pass) {
+    error.textContent = "";
+
+    if (!login || !password) {
         error.textContent = "Введите логин и пароль";
         return;
     }
 
-    const response = await fakeCheck(login, pass);
+    try {
+        const response = await fetch("http://localhost:5000/api/login", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                login: login,
+                password: password
+            })
+        });
 
-    if (response === "OK") {
-        window.location.href = "project.html";
-    } else {
-        error.textContent = "Ой, что-то не так. Попробуйте ещё раз.";
+        const data = await response.json();
+
+        if (data.accessLevel > 0) {
+            localStorage.setItem("accessLevel", data.accessLevel);
+            window.location.href = "project.html";
+        } else {
+            error.textContent = "Неверный логин или пароль";
+        }
+
+    } catch (err) {
+        console.error("Ошибка подключения:", err);
+        error.textContent = "Сервер недоступен";
     }
 };
-async function fakeCheck(login, pass) {
-    if (login === "admin" && pass === "123") return "OK";
-    return "FAIL";
-}
 </script>
 </body>
 </html>
