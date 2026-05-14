@@ -10,7 +10,7 @@
 
 <body class="dark">
 
-<div id="ovwrlay"></div>
+<div id="overlay"></div>
 
 <header class="header">
     <h1>Дашборд продуктивности ИТ‑подразделения</h1>
@@ -50,27 +50,41 @@
 </div>
 
 <script>
-let userRole = "admin";
+let chart;
+
+let accessLevel = Number(localStorage.getItem("accessLevel") || 0);
+
+if (accessLevel === 0) {
+    window.location.href = "login.html";
+}
+
+let userRole = "user";
+
+if (accessLevel === 1) userRole = "user";
+if (accessLevel === 2) userRole = "employee";
+if (accessLevel === 3) userRole = "admin";
 
 function applyRoleAccess() {
-    if (userRole === "admin"){
+    if (userRole === "admin") {
         return;
     }
 
-    if (userRole === "employee"){
+    if (userRole === "employee") {
         document.getElementById("btnSLA").style.display = "none";
     }
 
-    if (userRole === "user"){
+    if (userRole === "user") {
         document.getElementById("btnSLA").style.display = "none";
         document.getElementById("btnLoad").style.display = "none";
         document.getElementById("btnCombined").style.display = "none";
     }
 }
-let chart;
+
 document.getElementById("themeBtn").onclick = () => {
     document.body.classList.toggle("dark");
     document.body.classList.toggle("light");
+
+    const themeBtn = document.getElementById("themeBtn");
 
     themeBtn.textContent =
         document.body.classList.contains("light")
@@ -78,16 +92,23 @@ document.getElementById("themeBtn").onclick = () => {
             : "Светлая тема";
 
     if (chart) {
-        const isLight = document.body.classList.contains("light");
+        const textColor = getTextColor();
+        const gridColor = document.body.classList.contains("light")
+            ? "#c7d7f5"
+            : "#2c3e55";
 
-        chart.options.scales.x.ticks.color = isLight ? "#1a2536" : "#d0e4ff";
-        chart.options.scales.y.ticks.color = isLight ? "#1a2536" : "#d0e4ff";
+        if (chart.options.scales?.x) {
+            chart.options.scales.x.ticks.color = textColor;
+            chart.options.scales.x.grid.color = gridColor;
+        }
 
-        chart.options.scales.x.grid.color = isLight ? "#c7d7f5" : "#2c3e55";
-        chart.options.scales.y.grid.color = isLight ? "#c7d7f5" : "#2c3e55";
+        if (chart.options.scales?.y) {
+            chart.options.scales.y.ticks.color = textColor;
+            chart.options.scales.y.grid.color = gridColor;
+        }
 
-        if (chart.options.plugins.legend) {
-            chart.options.plugins.legend.labels.color = isLight ? "#1a2536" : "#d0e4ff";
+        if (chart.options.plugins?.legend) {
+            chart.options.plugins.legend.labels.color = textColor;
         }
 
         chart.update();
@@ -109,41 +130,179 @@ document.getElementById("overlay").onclick = () => {
     document.getElementById("overlay").classList.remove("show");
 };
 
-function renderChart(type, labels, datasets) {
-    if (chart) chart.destroy();
-
-    const ctx = document.getElementById('mainChart').getContext('2d');
-
-    chart = new Chart(ctx, {
-        type: type,
-        data: { labels, datasets },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                tooltip: { enabled: true },
-                legend: { position: 'bottom', labels: { color: getTextColor() } }
-            },
-            scales: {
-                x: { ticks: { color: getTextColor() } },
-                y: { ticks: { color: getTextColor() } }
-            }
-        }
-    });
-}
-
 function getTextColor() {
-    return document.body.classList.contains("light") ? "#1a2536" : "#d0e4ff";
+    return document.body.classList.contains("light")
+        ? "#1a2536"
+        : "#d0e4ff";
 }
 
 function showPeriods(show) {
     document.querySelector(".period-switcher").style.display = show ? "flex" : "none";
 }
 
+function renderChart(type, labels, datasets) {
+    if (chart) {
+        chart.destroy();
+    }
+
+    const ctx = document.getElementById("mainChart").getContext("2d");
+
+    chart = new Chart(ctx, {
+        type: type,
+        data: {
+            labels: labels,
+            datasets: datasets
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                tooltip: {
+                    enabled: true
+                },
+                legend: {
+                    position: "bottom",
+                    labels: {
+                        color: getTextColor()
+                    }
+                }
+            },
+            scales: type === "pie" || type === "doughnut"
+                ? {}
+                : {
+                    x: {
+                        ticks: {
+                            color: getTextColor()
+                        },
+                        grid: {
+                            color: document.body.classList.contains("light")
+                                ? "#c7d7f5"
+                                : "#2c3e55"
+                        }
+                    },
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            color: getTextColor()
+                        },
+                        grid: {
+                            color: document.body.classList.contains("light")
+                                ? "#c7d7f5"
+                                : "#2c3e55"
+                        }
+                    }
+                }
+        }
+    });
+}
+
+class DashboardUpdater {
+    async request(type) {
+        console.log("Запрос графика:", type);
+
+        try {
+            const response = await fetch("http://localhost:5000/api/dashboard", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    type: type
+                })
+            });
+
+            const data = await response.json();
+
+            if (data.error) {
+                console.error("Ошибка сервера:", data.error);
+                return;
+            }
+
+            this.apply(data);
+
+        } catch (err) {
+            console.error("Ошибка получения данных:", err);
+        }
+    }
+
+    apply(data) {
+        if (!data || !data.type || !data.labels || !data.datasets) {
+            console.error("Неверный формат данных:", data);
+            return;
+        }
+
+        switch (data.type) {
+            case "sla":
+                renderChart("bar", data.labels, data.datasets);
+                break;
+
+            case "load":
+                renderChart("bar", data.labels, data.datasets);
+                break;
+
+            case "combined_hour":
+            case "combined_day":
+            case "combined_week":
+            case "combined_month":
+                renderChart("bar", data.labels, data.datasets);
+                break;
+
+            case "statuses":
+                renderChart("pie", data.labels, data.datasets);
+                break;
+
+            case "lines":
+                renderChart("bar", data.labels, data.datasets);
+                break;
+
+            default:
+                console.error("Неизвестный тип графика:", data.type);
+        }
+    }
+}
+
+const update = new DashboardUpdater();
+
+function loadSLA() {
+    if (userRole !== "admin") return;
+
+    showPeriods(false);
+    update.request("sla");
+}
+
+function loadLoad() {
+    if (userRole === "user") return;
+
+    showPeriods(false);
+    update.request("load");
+}
+
 function loadCombined() {
     if (userRole === "user") return;
+
     showPeriods(true);
     update.request("combined_day");
+}
+
+function loadCombinedHour() {
+    if (userRole === "user") return;
+
+    showPeriods(true);
+    update.request("combined_hour");
+}
+
+function loadCombinedWeek() {
+    if (userRole === "user") return;
+
+    showPeriods(true);
+    update.request("combined_week");
+}
+
+function loadCombinedMonth() {
+    if (userRole === "user") return;
+
+    showPeriods(true);
+    update.request("combined_month");
 }
 
 function setPeriod(period) {
@@ -151,36 +310,6 @@ function setPeriod(period) {
     if (period === "day") loadCombined();
     if (period === "week") loadCombinedWeek();
     if (period === "month") loadCombinedMonth();
-}
-
-function loadCombinedHour() {
-    if (userRole === "user") return;
-    showPeriods(true);
-    update.request("combined_hour");
-}
-
-function loadCombinedWeek() {
-    if (userRole === "user") return;
-    showPeriods(true);
-    update.request("combined_week");
-}
-
-function loadCombinedMonth() {
-    if (userRole === "user") return;
-    showPeriods(true);
-    update.request("combined_month");
-}
-
-function loadSLA() {
-    if (userRole !== "admin") return;
-    showPeriods(false);
-    update.request("sla");
-}
-
-function loadLoad() {
-    if (userRole === "user") return;
-    showPeriods(false);
-    update.request("load");
 }
 
 function loadStatuses() {
@@ -193,41 +322,13 @@ function loadLinesStatuses() {
     update.request("lines");
 }
 
-applyRoleAccess();
-
-class DashboardUpdater {
-    //сюды смотри
-    request(type) {
-        console.log("Запрос данных:", type);
-    }
-
-    apply(data) {
-        if (!data || !data.type) {
-            console.error("Неверный формат данных:", data);
-            return;
-        }
-        switch (data.type) {
-            case "sla":
-                renderChart("bar", data.labels, data.datasets);
-                break;
-            case "combined":
-                renderChart("bar", data.labels, data.datasets);
-                break;
-            case "load":
-                renderChart("bar", data.labels, data.datasets);
-                break;
-            case "statuses":
-                renderChart("pie", data.labels, data.datasets);
-                break;
-            case "lines":
-                renderChart("bar", data.labels, data.datasets);
-                break;
-            default:
-                console.error("Неизвестный тип:", data.type);
-        }
-    }
+function logout() {
+    localStorage.removeItem("accessLevel");
+    window.location.href = "login.html";
 }
-const update = new DashboardUpdater();
+
+applyRoleAccess();
+loadStatuses();
 </script>
 
 </body>
