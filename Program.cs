@@ -136,7 +136,7 @@ namespace Dashboard
 
         static int GetAccessLevel(string login, string password)
         {
-            using var connect = new SQLiteConnection(@"Data Source=D:/dashboard/auth.db; Version=3;");
+            using var connect = new SQLiteConnection(@"Data Source=auth.db; Version=3;");
             connect.Open();
 
             using var command = connect.CreateCommand();
@@ -203,7 +203,7 @@ namespace Dashboard
 
         static async Task<OneCExport?> ReadOneCExport()
         {
-            string filePath = @"D:/dashboard/result.json";
+            string filePath = @"result.json";
 
             if (!File.Exists(filePath))
                 return null;
