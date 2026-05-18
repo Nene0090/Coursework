@@ -93,7 +93,7 @@ namespace Dashboard
                 return await HandleDashboard(context);
             });
 
-            app.Run("http://localhost:5000");
+            app.Run("http://192.168.1.50:5000");
         }
 
         static async Task<IResult> HandleLogin(HttpContext context)
