@@ -25,9 +25,9 @@
     <p id="error"></p>
 </div>
 
-<script src="fetch.js"></script>
+<script type="module">
+import { loginRequest } from "./fetch.js";
 
-<script>
 document.getElementById("loginBtn").onclick = async () => {
     const login = document.getElementById("login").value.trim();
     const password = document.getElementById("password").value.trim();
