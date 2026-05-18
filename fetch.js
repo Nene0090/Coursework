@@ -1,6 +1,5 @@
 async function fetchWithAccess(login, password) {
-    // Авторизация
-    const authResponse = await fetch("https://localhost:5000", {
+    const authResponse = await fetch("http://192.168.1.50:5000", {
         method: "POST",
         headers: {
             "Content-Type": "application/json"
@@ -15,10 +14,9 @@ async function fetchWithAccess(login, password) {
         return { error: "auth_failed", details: authData };
     }
 
-    const access = authData.access; // уровень доступа
+    const access = authData.access;
 
-    // Запрос данных от 1С с уровнем доступа
-    const oneCResponse = await fetch("https://localhost:5000", {
+    const oneCResponse = await fetch("http://192.168.1.50:5000", {
         method: "POST",
         headers: {
             "Content-Type": "application/json"
