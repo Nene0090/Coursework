@@ -140,7 +140,7 @@ namespace Dashboard
             connect.Open();
 
             using var command = connect.CreateCommand();
-            command.CommandText = @"SELECT access_level FROM users WHERE login = @loginAND password_hash = @passwordLIMIT 1";
+            command.CommandText = @"SELECT access_level FROM users WHERE login = @login AND password_hash = @password LIMIT 1";
             command.Parameters.AddWithValue("@login", login);
             command.Parameters.AddWithValue("@password", password);
 
