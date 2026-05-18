@@ -136,11 +136,11 @@ namespace Dashboard
 
         static int GetAccessLevel(string login, string password)
         {
-            using var connect = new SQLiteConnection(@"Data Source=D:/auth.db; Version=3;");
+            using var connect = new SQLiteConnection(@"Data Source=D:/dashboard/auth.db; Version=3;");
             connect.Open();
 
             using var command = connect.CreateCommand();
-            command.CommandText = @"SELECT access_level FROM users WHERE login = @login AND password_hash = @password LIMIT 1";
+            command.CommandText = @"SELECT access_level FROM users WHERE login = @login AND password = @password LIMIT 1";
             command.Parameters.AddWithValue("@login", login);
             command.Parameters.AddWithValue("@password", password);
 
