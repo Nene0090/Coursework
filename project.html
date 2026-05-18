@@ -49,9 +49,9 @@
     <button id="btnLines" onclick="loadLinesStatuses()">Статусы по линиям</button>
 </div>
 
-<script src="fetch.js"></script>
+<script type="module">
+import { dashboardRequest } from "./fetch.js";
 
-<script>
 let chart;
 
 let accessLevel = Number(localStorage.getItem("accessLevel") || 0);
@@ -67,9 +67,7 @@ if (accessLevel === 2) userRole = "employee";
 if (accessLevel === 3) userRole = "admin";
 
 function applyRoleAccess() {
-    if (userRole === "admin") {
-        return;
-    }
+    if (userRole === "admin") return;
 
     if (userRole === "employee") {
         document.getElementById("btnSLA").style.display = "none";
@@ -142,9 +140,7 @@ function showPeriods(show) {
 }
 
 function renderChart(type, labels, datasets) {
-    if (chart) {
-        chart.destroy();
-    }
+    if (chart) chart.destroy();
 
     const ctx = document.getElementById("mainChart").getContext("2d");
 
@@ -158,23 +154,17 @@ function renderChart(type, labels, datasets) {
             responsive: true,
             maintainAspectRatio: false,
             plugins: {
-                tooltip: {
-                    enabled: true
-                },
+                tooltip: { enabled: true },
                 legend: {
                     position: "bottom",
-                    labels: {
-                        color: getTextColor()
-                    }
+                    labels: { color: getTextColor() }
                 }
             },
             scales: type === "pie" || type === "doughnut"
                 ? {}
                 : {
                     x: {
-                        ticks: {
-                            color: getTextColor()
-                        },
+                        ticks: { color: getTextColor() },
                         grid: {
                             color: document.body.classList.contains("light")
                                 ? "#c7d7f5"
@@ -183,9 +173,7 @@ function renderChart(type, labels, datasets) {
                     },
                     y: {
                         beginAtZero: true,
-                        ticks: {
-                            color: getTextColor()
-                        },
+                        ticks: { color: getTextColor() },
                         grid: {
                             color: document.body.classList.contains("light")
                                 ? "#c7d7f5"
@@ -222,26 +210,17 @@ class DashboardUpdater {
 
         switch (data.type) {
             case "sla":
-                renderChart("bar", data.labels, data.datasets);
-                break;
-
             case "load":
-                renderChart("bar", data.labels, data.datasets);
-                break;
-
             case "combined_hour":
             case "combined_day":
             case "combined_week":
             case "combined_month":
+            case "lines":
                 renderChart("bar", data.labels, data.datasets);
                 break;
 
             case "statuses":
                 renderChart("pie", data.labels, data.datasets);
-                break;
-
-            case "lines":
-                renderChart("bar", data.labels, data.datasets);
                 break;
 
             default:
@@ -314,6 +293,5 @@ applyRoleAccess();
 showPeriods(false);
 loadStatuses();
 </script>
-
 </body>
 </html>
