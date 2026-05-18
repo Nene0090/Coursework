@@ -49,6 +49,8 @@
     <button id="btnLines" onclick="loadLinesStatuses()">Статусы по линиям</button>
 </div>
 
+<script src="fetch.js"></script>
+
 <script>
 let chart;
 
@@ -115,15 +117,14 @@ document.getElementById("themeBtn").onclick = () => {
     }
 };
 
-document.getElementById("menuBtn").onclick = toggleMenu;
-
 function toggleMenu() {
     const menu = document.getElementById("sideMenu");
     const overlay = document.getElementById("overlay");
-
     menu.classList.toggle("open");
     overlay.classList.toggle("show");
 }
+
+document.getElementById("menuBtn").onclick = toggleMenu;
 
 document.getElementById("overlay").onclick = () => {
     document.getElementById("sideMenu").classList.remove("open");
@@ -198,20 +199,8 @@ function renderChart(type, labels, datasets) {
 
 class DashboardUpdater {
     async request(type) {
-        console.log("Запрос графика:", type);
-
         try {
-            const response = await fetch("http://localhost:5000/api/dashboard", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({
-                    type: type
-                })
-            });
-
-            const data = await response.json();
+            const data = await dashboardRequest(type);
 
             if (data.error) {
                 console.error("Ошибка сервера:", data.error);
@@ -265,42 +254,36 @@ const update = new DashboardUpdater();
 
 function loadSLA() {
     if (userRole !== "admin") return;
-
     showPeriods(false);
     update.request("sla");
 }
 
 function loadLoad() {
     if (userRole === "user") return;
-
     showPeriods(false);
     update.request("load");
 }
 
 function loadCombined() {
     if (userRole === "user") return;
-
     showPeriods(true);
     update.request("combined_day");
 }
 
 function loadCombinedHour() {
     if (userRole === "user") return;
-
     showPeriods(true);
     update.request("combined_hour");
 }
 
 function loadCombinedWeek() {
     if (userRole === "user") return;
-
     showPeriods(true);
     update.request("combined_week");
 }
 
 function loadCombinedMonth() {
     if (userRole === "user") return;
-
     showPeriods(true);
     update.request("combined_month");
 }
@@ -324,10 +307,11 @@ function loadLinesStatuses() {
 
 function logout() {
     localStorage.removeItem("accessLevel");
-    window.location.href = "login.html";
+    window.location.href = "index.html";
 }
 
 applyRoleAccess();
+showPeriods(false);
 loadStatuses();
 </script>
 
