@@ -25,6 +25,8 @@
     <p id="error"></p>
 </div>
 
+<script src="fetch.js"></script>
+
 <script>
 document.getElementById("loginBtn").onclick = async () => {
     const login = document.getElementById("login").value.trim();
@@ -39,18 +41,7 @@ document.getElementById("loginBtn").onclick = async () => {
     }
 
     try {
-        const response = await fetch("http://localhost:5000/api/login", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-                login: login,
-                password: password
-            })
-        });
-
-        const data = await response.json();
+        const data = await loginRequest(login, password);
 
         if (data.accessLevel > 0) {
             localStorage.setItem("accessLevel", data.accessLevel);
