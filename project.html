@@ -49,42 +49,30 @@
     <button id="btnLines" onclick="loadLinesStatuses()">Статусы по линиям</button>
 </div>
 
-<script type="module">
-import { dashboardRequest } from "./fetch.js";
-
-let chart;
-
-let accessLevel = Number(localStorage.getItem("accessLevel") || 0);
-
-if (accessLevel === 0) {
-    window.location.href = "login.html";
-}
-
-let userRole = "user";
-
-if (accessLevel === 1) userRole = "user";
-if (accessLevel === 2) userRole = "employee";
-if (accessLevel === 3) userRole = "admin";
+<script>
+let userRole = "admin";
 
 function applyRoleAccess() {
-    if (userRole === "admin") return;
-
-    if (userRole === "employee") {
-        document.getElementById("btnSLA").style.display = "none";
+    if (userRole === "admin"){
+        return;
     }
 
-    if (userRole === "user") {
+    if (userRole === "employee"){
+        document.getElementById("btnSLA").style.display = "none";
+        document.getElementById("btnBase").style.display = "none";
+    }
+
+    if (userRole === "user"){
         document.getElementById("btnSLA").style.display = "none";
         document.getElementById("btnLoad").style.display = "none";
         document.getElementById("btnCombined").style.display = "none";
+        document.getElementById("btnBase").style.display = "none";
     }
 }
-
+let chart;
 document.getElementById("themeBtn").onclick = () => {
     document.body.classList.toggle("dark");
     document.body.classList.toggle("light");
-
-    const themeBtn = document.getElementById("themeBtn");
 
     themeBtn.textContent =
         document.body.classList.contains("light")
@@ -92,179 +80,100 @@ document.getElementById("themeBtn").onclick = () => {
             : "Светлая тема";
 
     if (chart) {
-        const textColor = getTextColor();
-        const gridColor = document.body.classList.contains("light")
-            ? "#c7d7f5"
-            : "#2c3e55";
+        const isLight = document.body.classList.contains("light");
 
-        if (chart.options.scales?.x) {
-            chart.options.scales.x.ticks.color = textColor;
-            chart.options.scales.x.grid.color = gridColor;
-        }
+        chart.options.scales.x.ticks.color = isLight ? "#1a2536" : "#d0e4ff";
+        chart.options.scales.y.ticks.color = isLight ? "#1a2536" : "#d0e4ff";
 
-        if (chart.options.scales?.y) {
-            chart.options.scales.y.ticks.color = textColor;
-            chart.options.scales.y.grid.color = gridColor;
-        }
+        chart.options.scales.x.grid.color = isLight ? "#c7d7f5" : "#2c3e55";
+        chart.options.scales.y.grid.color = isLight ? "#c7d7f5" : "#2c3e55";
 
-        if (chart.options.plugins?.legend) {
-            chart.options.plugins.legend.labels.color = textColor;
+        if (chart.options.plugins.legend) {
+            chart.options.plugins.legend.labels.color = isLight ? "#1a2536" : "#d0e4ff";
         }
 
         chart.update();
     }
 };
 
+document.getElementById("menuBtn").onclick = toggleMenu;
+
 function toggleMenu() {
     const menu = document.getElementById("sideMenu");
     const overlay = document.getElementById("overlay");
+
     menu.classList.toggle("open");
     overlay.classList.toggle("show");
 }
-
-document.getElementById("menuBtn").onclick = toggleMenu;
 
 document.getElementById("overlay").onclick = () => {
     document.getElementById("sideMenu").classList.remove("open");
     document.getElementById("overlay").classList.remove("show");
 };
 
+function renderChart(type, labels, datasets) {
+    if (chart) chart.destroy();
+
+    const ctx = document.getElementById('mainChart').getContext('2d');
+
+    chart = new Chart(ctx, {
+        type: type,
+        data: { labels, datasets },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                tooltip: { enabled: true },
+                legend: { position: 'bottom', labels: { color: getTextColor() } }
+            },
+            scales: {
+                x: { ticks: { color: getTextColor() } },
+                y: { ticks: { color: getTextColor() } }
+            }
+        }
+    });
+}
+
 function getTextColor() {
-    return document.body.classList.contains("light")
-        ? "#1a2536"
-        : "#d0e4ff";
+    return document.body.classList.contains("light") ? "#1a2536" : "#d0e4ff";
 }
 
 function showPeriods(show) {
     document.querySelector(".period-switcher").style.display = show ? "flex" : "none";
 }
 
-function renderChart(type, labels, datasets) {
-    if (chart) chart.destroy();
-
-    const ctx = document.getElementById("mainChart").getContext("2d");
-
-    chart = new Chart(ctx, {
-        type: type,
-        data: {
-            labels: labels,
-            datasets: datasets
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                tooltip: { enabled: true },
-                legend: {
-                    position: "bottom",
-                    labels: { color: getTextColor() }
-                }
-            },
-            scales: type === "pie" || type === "doughnut"
-                ? {}
-                : {
-                    x: {
-                        ticks: { color: getTextColor() },
-                        grid: {
-                            color: document.body.classList.contains("light")
-                                ? "#c7d7f5"
-                                : "#2c3e55"
-                        }
-                    },
-                    y: {
-                        beginAtZero: true,
-                        ticks: { color: getTextColor() },
-                        grid: {
-                            color: document.body.classList.contains("light")
-                                ? "#c7d7f5"
-                                : "#2c3e55"
-                        }
-                    }
-                }
-        }
-    });
-}
-
-class DashboardUpdater {
-    async request(type) {
-        try {
-            const data = await dashboardRequest(type);
-
-            if (data.error) {
-                console.error("Ошибка сервера:", data.error);
-                return;
-            }
-
-            this.apply(data);
-
-        } catch (err) {
-            console.error("Ошибка получения данных:", err);
-        }
-    }
-
-    apply(data) {
-        if (!data || !data.type || !data.labels || !data.datasets) {
-            console.error("Неверный формат данных:", data);
-            return;
-        }
-
-        switch (data.type) {
-            case "sla":
-            case "load":
-            case "combined_hour":
-            case "combined_day":
-            case "combined_week":
-            case "combined_month":
-            case "lines":
-                renderChart("bar", data.labels, data.datasets);
-                break;
-
-            case "statuses":
-                renderChart("pie", data.labels, data.datasets);
-                break;
-
-            default:
-                console.error("Неизвестный тип графика:", data.type);
-        }
-    }
-}
-
-const update = new DashboardUpdater();
-
-function loadSLA() {
-    if (userRole !== "admin") return;
-    showPeriods(false);
-    update.request("sla");
-}
-
-function loadLoad() {
-    if (userRole === "user") return;
-    showPeriods(false);
-    update.request("load");
-}
-
 function loadCombined() {
     if (userRole === "user") return;
     showPeriods(true);
-    update.request("combined_day");
-}
 
-function loadCombinedHour() {
-    if (userRole === "user") return;
-    showPeriods(true);
-    update.request("combined_hour");
-}
+    const labels = ["01.04", "02.04", "03.04", "04.04"];
 
-function loadCombinedWeek() {
-    if (userRole === "user") return;
-    showPeriods(true);
-    update.request("combined_week");
-}
+    const datasets = [
+        {
+            type: "bar",
+            label: "Количество тикетов",
+            data: [15, 20, 18, 25],
+            backgroundColor: "rgba(80,150,255,0.6)",
+            borderColor: "rgba(80,150,255,1)",
+            borderWidth: 2
+        },
+        {
+            type: "line",
+            label: "Время реакции (мин)",
+            data: [10, 15, 12, 18],
+            borderColor: "rgba(120,180,255,1)",
+            borderWidth: 2
+        },
+        {
+            type: "line",
+            label: "Время решения (мин)",
+            data: [60, 70, 55, 80],
+            borderColor: "rgba(160,210,255,1)",
+            borderWidth: 2
+        }
+    ];
 
-function loadCombinedMonth() {
-    if (userRole === "user") return;
-    showPeriods(true);
-    update.request("combined_month");
+    renderChart("bar", labels, datasets);
 }
 
 function setPeriod(period) {
@@ -274,24 +183,151 @@ function setPeriod(period) {
     if (period === "month") loadCombinedMonth();
 }
 
+function loadCombinedHour() {
+    if (userRole === "user") return;
+    showPeriods(true);
+    renderChart("bar",
+        ["10:00", "11:00", "12:00", "13:00"],
+        [
+            { type: "bar", label: "Тикеты", data: [3, 5, 4, 6], backgroundColor: "rgba(80,150,255,0.6)" },
+            { type: "line", label: "Реакция", data: [12, 15, 14, 18], borderColor: "rgba(120,180,255,1)" },
+            { type: "line", label: "Решение", data: [60, 55, 70, 65], borderColor: "rgba(160,210,255,1)" }
+        ]
+    );
+}
+
+function loadCombinedWeek() {
+    if (userRole === "user") return;
+    showPeriods(true);
+    renderChart("bar",
+        ["Пн", "Вт", "Ср", "Чт", "Пт"],
+        [
+            { type: "bar", label: "Тикеты", data: [20, 25, 18, 30, 22], backgroundColor: "rgba(80,150,255,0.6)" },
+            { type: "line", label: "Реакция", data: [12, 14, 13, 16, 15], borderColor: "rgba(120,180,255,1)" },
+            { type: "line", label: "Решение", data: [70, 65, 80, 75, 72], borderColor: "rgba(160,210,255,1)" }
+        ]
+    );
+}
+
+function loadCombinedMonth() {
+    if (userRole === "user") return;
+    showPeriods(true);
+    renderChart("bar",
+        ["1 неделя", "2 неделя", "3 неделя", "4 неделя"],
+        [
+            { type: "bar", label: "Тикеты", data: [80, 95, 70, 100], backgroundColor: "rgba(80,150,255,0.6)" },
+            { type: "line", label: "Реакция", data: [14, 13, 15, 16], borderColor: "rgba(120,180,255,1)" },
+            { type: "line", label: "Решение", data: [75, 80, 70, 85], borderColor: "rgba(160,210,255,1)" }
+        ]
+    );
+}
+
+function loadSLA() {
+    if (userRole !== "admin") return;
+    showPeriods(false);
+    renderChart("bar",
+        ["P1", "P2", "P3"],
+        [
+            { label: "Реакция", data: [12, 25, 80], backgroundColor: "rgba(80,150,255,0.6)" },
+            { label: "Решение", data: [50, 180, 400], backgroundColor: "rgba(120,180,255,0.6)" },
+            { label: "Нарушения SLA (%)", data: [10, 20, 35], backgroundColor: "rgba(160,210,255,0.6)" }
+        ]
+    );
+}
+
+function loadLoad() {
+    if (userRole === "user") return;
+    showPeriods(false);
+
+    renderChart("bar",
+        ["Иванов", "Петров", "Сидоров"],
+        [
+            {
+                label: "Активные",
+                data: [5, 8, 3],
+                backgroundColor: "rgba(90,170,255,0.6)"
+            },
+            {
+                label: "Выполненные",
+                data: [12, 15, 9],
+                backgroundColor: "rgba(100,200,120,0.6)"
+            },
+            {
+                label: "Отложенные",
+                data: [3, 2, 1],
+                backgroundColor: "rgba(255,200,80,0.6)"
+            },
+            {
+                label: "Брошенные",
+                data: [1, 0, 2],
+                backgroundColor: "rgba(255,120,120,0.6)"
+            }
+        ]
+    );
+}
+
+
 function loadStatuses() {
     showPeriods(false);
-    update.request("statuses");
+
+    if (chart) chart.destroy();
+
+    const ctx = document.getElementById('mainChart').getContext('2d');
+
+    chart = new Chart(ctx, {
+        type: "pie",
+        data: {
+            labels: ["Выполнено", "В работе", "Отложено", "Не выполнено"],
+            datasets: [
+                {
+                    label: "Статусы",
+                    data: [40, 20, 10, 5],
+                    backgroundColor: [
+                        "rgba(80,150,255,0.7)",
+                        "rgba(120,180,255,0.7)",
+                        "rgba(160,210,255,0.7)",
+                        "rgba(200,230,255,0.7)"
+                    ]
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            layout: {
+                padding: 0
+            },
+            plugins: {
+                legend: {
+                    position: "bottom",
+                    labels: {
+                        color: getTextColor()
+                    }
+                }
+            }
+        }
+    });
 }
 
 function loadLinesStatuses() {
     showPeriods(false);
-    update.request("lines");
+    renderChart("bar",
+        ["1-я линия", "2-я линия"],
+        [
+            { label: "Выполнено", data: [20, 15], backgroundColor: "rgba(80,150,255,0.7)" },
+            { label: "В работе", data: [10, 12], backgroundColor: "rgba(120,180,255,0.7)" },
+            { label: "Отложено", data: [5, 3], backgroundColor: "rgba(160,210,255,0.7)" }
+        ]
+    );
 }
 
-function logout() {
-    localStorage.removeItem("accessLevel");
-    window.location.href = "index.html";
+function loadBaseData() {
+    if (userRole !== "admin") return;
+    showPeriods(false);
+    alert("Загрузка базы...");
 }
-
 applyRoleAccess();
-showPeriods(false);
-loadStatuses();
 </script>
+
 </body>
 </html>
