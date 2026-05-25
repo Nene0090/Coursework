@@ -25,36 +25,29 @@
     <p id="error"></p>
 </div>
 
-<script type="module">
-import { loginRequest } from "./fetch.js";
-
+<script>
 document.getElementById("loginBtn").onclick = async () => {
     const login = document.getElementById("login").value.trim();
-    const password = document.getElementById("password").value.trim();
+    const pass = document.getElementById("password").value.trim();
     const error = document.getElementById("error");
 
-    error.textContent = "";
-
-    if (!login || !password) {
+    if (!login || !pass) {
         error.textContent = "Введите логин и пароль";
         return;
     }
 
-    try {
-        const data = await loginRequest(login, password);
+    const response = await fakeCheck(login, pass);
 
-        if (data.accessLevel > 0) {
-            localStorage.setItem("accessLevel", data.accessLevel);
-            window.location.href = "project.html";
-        } else {
-            error.textContent = "Неверный логин или пароль";
-        }
-
-    } catch (err) {
-        console.error("Ошибка подключения:", err);
-        error.textContent = "Сервер недоступен";
+    if (response === "OK") {
+        window.location.href = "project.html";
+    } else {
+        error.textContent = "Ой, что-то не так. Попробуйте ещё раз.";
     }
 };
+async function fakeCheck(login, pass) {
+    if (login === "admin" && pass === "123") return "OK";
+    return "FAIL";
+}
 </script>
 </body>
 </html>
